@@ -8,9 +8,12 @@ def evaluate(g):
     normEff = 0
     return normEff
 
-# Uses Floyd Warshall algorithm
+# Calculates the efficiency of the graph by analyzing distances between every pair of
+# nodes. This uses the Floyd Warshall algorithm
 # Input: A graph
+# Output: The efficiency value
 def efficiency(g):
+    # Find the distance for every pair of nodes
     dist = [[0 for c in range(g.n)] for r in range(g.n)]
     INF = 999
 
@@ -25,11 +28,16 @@ def efficiency(g):
             for j in range(g.n):
                 dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
 
+    # Calculation for average APSP for the given graph
     APSP = 0
     for r in dist:
         APSP += reduce(lambda x, y: x + y, r)
     APSP /= g.n * (g.n - 1)
-    print(APSP)
+
+    # APSP for a star
+    starAPSP = 2 * (1 - 1 / g.n)
+
+    return starAPSP / APSP
 def robustness(g):
     return 0
 
