@@ -1,6 +1,40 @@
 from queue import Queue
+from functools import reduce
 
-# def evaluate():
+# Calculates G, or the survival fitness function, for a given graph g
+# Input: A graph
+# Output: A fitness score
+def evaluate(g):
+    normEff = 0
+    return normEff
+
+# Uses Floyd Warshall algorithm
+# Input: A graph
+def efficiency(g):
+    dist = [[0 for c in range(g.n)] for r in range(g.n)]
+    INF = 999
+
+    for r in range(g.n):
+        for c in range(g.n):
+            dist[r][c] = g.adj[r][c]
+            if r != c and g.adj[r][c] == 0: # No edge exists between r and c
+                dist[r][c] = INF
+
+    for k in range(g.n):
+        for i in range(g.n):
+            for j in range(g.n):
+                dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+    APSP = 0
+    for r in dist:
+        APSP += reduce(lambda x, y: x + y, r)
+    APSP /= g.n * (g.n - 1)
+    print(APSP)
+def robustness(g):
+    return 0
+
+def cost(g):
+    return 0
 
 # Check if a graph is connected. Uses Kosaraju algorithm for BFS.
 # Input: Adjacency matrix

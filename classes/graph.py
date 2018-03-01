@@ -1,8 +1,10 @@
 class Graph:
-    def __init__(self, n):
-        self.n = n
-        # Initialize adjacency matrix
-        self.adj = [[0 for i in range(n)] for j in range(n)]
+    def __init__(self, n, e, connected, weighted):
+        self.n = n # Nodes
+        self.e = e # Edges
+        self.weighted = weighted # Weighted?
+        self.connected = connected # Connected?
+        self.adj = [[0 for i in range(n)] for j in range(n)] # Adj matrix
     def __str__(self):
         printStr = "   "
         for i in range(self.n):
@@ -11,3 +13,5 @@ class Graph:
         for i in range(self.n):
             printStr += str(i) + " " + str(self.adj[i]) + "\n"
         return printStr
+    def resetEdges(self):
+        self.adj = [[0 for i in range(self.n)] for j in range(self.n)]
