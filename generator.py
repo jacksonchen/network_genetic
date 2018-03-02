@@ -1,4 +1,4 @@
-import random
+from random import random
 
 from classes.graph import Graph
 from evaluator import isConnected
@@ -13,11 +13,11 @@ def randomizeEdge(g):
     remaining = g.n ** 2 - g.n; # All possibilities except for main diagonal of adj matrix
     for i in range(g.n ** 2): # Flatten adj matrix into 1D array
         if i % (g.n + 1) != 0: # Ignore elements on main diagonal
-            if random.random() < eNeeded / remaining: # Normalize probability of adding edge
+            if random() < eNeeded / remaining: # Normalize probability of adding edge
                 r = i // g.n
                 c = i % g.n
                 if g.weighted:
-                    g.adj[r][c] = random.random()
+                    g.adj[r][c] = random()
                 else:
                     g.adj[r][c] = 1
                 eNeeded -= 1
@@ -35,7 +35,6 @@ def generate(n, e, pool, needConnected, weighted):
         while needConnected and not isConnected(g.adj):
             g.resetEdges()
             randomizeEdge(g)
-        print(g)
         graphs.append(g)
 
     return graphs

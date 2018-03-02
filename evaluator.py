@@ -5,7 +5,7 @@ from functools import reduce
 # Input: A graph
 # Output: A fitness score
 def evaluate(g):
-    normEff = 0
+    normEff = efficiency(g)
     return normEff
 
 # Calculates the efficiency of the graph by analyzing distances between every pair of
@@ -23,6 +23,7 @@ def efficiency(g):
             if r != c and g.adj[r][c] == 0: # No edge exists between r and c
                 dist[r][c] = INF
 
+    # Floyd Warshall
     for k in range(g.n):
         for i in range(g.n):
             for j in range(g.n):
@@ -38,10 +39,11 @@ def efficiency(g):
     starAPSP = 2 * (1 - 1 / g.n)
 
     return starAPSP / APSP
-def robustness(g):
-    return 0
 
-def cost(g):
+# Calculates the robustness of a graph
+# Input: A graph
+# Output: The robustness value
+def robustness(g):
     return 0
 
 # Check if a graph is connected. Uses Kosaraju algorithm for BFS.
