@@ -17,6 +17,7 @@ def efficiency(g):
     dist = [[0 for c in range(g.n)] for r in range(g.n)]
     INF = 999
 
+    # Set missing edges to infinity
     for r in range(g.n):
         for c in range(g.n):
             dist[r][c] = g.adj[r][c]
@@ -28,6 +29,12 @@ def efficiency(g):
         for i in range(g.n):
             for j in range(g.n):
                 dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+    # Reset edges that are infinity
+    for r in range(g.n):
+        for c in range(g.n):
+            if dist[r][c] == INF:
+                dist[r][c] = 0
 
     # Calculation for average APSP for the given graph
     APSP = 0
@@ -48,13 +55,13 @@ def robustness(g):
     for j in range(g.n):
         modifiedAdj = []
 
-        for r in len(g.n):
+        for r in range(g.n):
             if r != j:
                 tmpArr = []
-                for c in len(g.n):
+                for c in range(g.n):
                     if c != j:
-                        tmpArr.push(g.adj[r][c])
-                modifiedAdj.push(tmpArr)
+                        tmpArr.append(g.adj[r][c])
+                modifiedAdj.append(tmpArr)
         strucR[j] = structuralRobustness(modifiedAdj) / (g.n - 2)
 
     funcR = [0] * g.n # Functional robustness
