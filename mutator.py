@@ -46,7 +46,7 @@ def mutateEdge(g):
 # Input: Two graphs
 # Output: Two children graphs
 def crossover(g1, g2):
-    if g1.n != g2.n:
+    if g1.n != g2.n: # The dimensions of the graphs don't match
         return []
 
     # Sub-rectangle dimensions

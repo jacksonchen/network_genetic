@@ -40,11 +40,70 @@ def efficiency(g):
 
     return starAPSP / APSP
 
-# Calculates the robustness of a graph
+# Calculates the structural and functional robustness of a graph
 # Input: A graph
 # Output: The robustness value
 def robustness(g):
-    return 0
+    strucR = [0] * g.n # Structural robustness with respect to each node
+    for j in range(g.n):
+        modifiedAdj = []
+
+        for r in len(g.n):
+            if r != j:
+                tmpArr = []
+                for c in len(g.n):
+                    if c != j:
+                        tmpArr.push(g.adj[r][c])
+                modifiedAdj.push(tmpArr)
+        strucR[j] = structuralRobustness(modifiedAdj) / (g.n - 2)
+
+    funcR = [0] * g.n # Functional robustness
+    return min(strucR)
+
+# Calculates the effective accessibility of a graph.
+# It does this by computing two DFS using Kosaraju's algorithm
+# Input: An adjacency matrix
+# Output: The effective accessibility of the graph
+def structuralRobustness(adj):
+    visited = [False] * len(adj)
+    stack = []
+    accessibility = 0
+
+    for i in range(len(adj)):
+        if visited[i] == False:
+            dfsStackRecurse(adj, i, visited, stack)
+
+    # Transpose adjacency matrix
+    transposeAdj = [[adj[j][i] for j in range(len(adj))] for i in range(len(adj[0]))]
+
+    visited = [False] * len(adj)
+    while len(stack) > 0:
+        i = stack.pop()
+        if visited[i] == False:
+            accessibility += dfsSCCRecurse(adj, i, visited) - 1
+    return accessibility
+
+# Runs a DFS of the graph and populates a stack with deepest nodes first
+# Input: Adjacency matrix, node, boolean array of visited values, stack
+# Output: Nothing
+def dfsStackRecurse(adj, i, visited, stack):
+    visited[i] = True
+    for j in range(len(adj[i])):
+        if adj[i][j] == 1 and visited[j] == False:
+            dfsStackRecurse(adj, j, visited, stack)
+    stack = stack.append(i)
+
+# Runs a DFS on a graph and sums up the number of nodes of the strongly
+# connected component (SCC) that contains node i
+# Input: Adjacency matrix, node, boolean array of visited values
+# Output: Node count in the respective SCC (int)
+def dfsSCCRecurse(adj, i, visited):
+    visited[i] = True
+    components = 1
+    for j in range(len(adj[i])):
+        if adj[i][j] == 1 and visited[j] == False:
+            components += dfsSCCRecurse(adj, j, visited)
+    return components
 
 # Check if a graph is connected. Uses Kosaraju algorithm for BFS.
 # Input: Adjacency matrix
