@@ -1,4 +1,5 @@
 from queue import Queue
+from classes.graph import Graph
 from functools import reduce
 
 # Calculates G, or the survival fitness function, for a given graph g
@@ -13,6 +14,9 @@ def evaluate(g):
 # Input: A graph
 # Output: The efficiency value
 def efficiency(g):
+    if (g.n <= 1): # Graph with just one node have no efficiency
+        return -1
+
     # Find the distance for every pair of nodes
     dist = [[0 for c in range(g.n)] for r in range(g.n)]
     INF = 999
@@ -52,6 +56,7 @@ def efficiency(g):
 # Output: The robustness value
 def robustness(g):
     strucR = [0] * g.n # Structural robustness with respect to each node
+    funcR = [0] * g.n # Functional robustness
     for j in range(g.n):
         modifiedAdj = []
 
@@ -63,9 +68,45 @@ def robustness(g):
                         tmpArr.append(g.adj[r][c])
                 modifiedAdj.append(tmpArr)
         strucR[j] = structuralRobustness(modifiedAdj) / (g.n - 2)
+        funcR[j] = functionalRobustness(modifiedAdj)
 
-    funcR = [0] * g.n # Functional robustness
     return min(strucR)
+
+def functionalRobustness(adj):
+    visited = [False] * len(adj)
+    stack = []
+    largestSCC = []
+
+    for i in range(len(adj)):
+        if visited[i] == False:
+            dfsStackRecurse(adj, i, visited, stack)
+
+    transposeAdj = transpose(adj)
+    visited = [False] * len(adj)
+
+    while len(stack) > 0:
+        i = stack.pop()
+        if visited[i] == False:
+            tempSCC = dfsSCCRecurse(transposeAdj, i, visited)
+            if len(tempSCC) > len(largestSCC):
+                largestSCC = tempSCC
+
+    # Create new graph with just the largest SCC
+    newAdj = []
+    newEdges = 0
+    for i in largestSCC:
+        tmpArr = []
+        for j in largestSCC:
+            if i == j:
+                tmpArr.append(0)
+            else:
+                tmpArr.append(adj[i][j])
+                newEdges += adj[i][j]
+        newAdj.append(tmpArr)
+
+    newG = Graph(len(newAdj), newEdges, True, False)
+    newG.adj = newAdj
+    return efficiency(newG)
 
 # Calculates the effective accessibility of a graph.
 # It does this by computing two DFS using Kosaraju's algorithm
@@ -76,18 +117,18 @@ def structuralRobustness(adj):
     stack = []
     accessibility = 0
 
+    # Populate stack
     for i in range(len(adj)):
         if visited[i] == False:
             dfsStackRecurse(adj, i, visited, stack)
 
-    # Transpose adjacency matrix
-    transposeAdj = [[adj[j][i] for j in range(len(adj))] for i in range(len(adj[0]))]
-
+    # Calculate accessibility
+    transposeAdj = transpose(adj)
     visited = [False] * len(adj)
     while len(stack) > 0:
         i = stack.pop()
         if visited[i] == False:
-            accessibility += dfsSCCRecurse(adj, i, visited) - 1
+            accessibility += len(dfsSCCRecurse(transposeAdj, i, visited)) - 1
     return accessibility
 
 # Runs a DFS of the graph and populates a stack with deepest nodes first
@@ -103,10 +144,10 @@ def dfsStackRecurse(adj, i, visited, stack):
 # Runs a DFS on a graph and sums up the number of nodes of the strongly
 # connected component (SCC) that contains node i
 # Input: Adjacency matrix, node, boolean array of visited values
-# Output: Node count in the respective SCC (int)
+# Output: Nodes in the respective SCC (array)
 def dfsSCCRecurse(adj, i, visited):
     visited[i] = True
-    components = 1
+    components = [i]
     for j in range(len(adj[i])):
         if adj[i][j] == 1 and visited[j] == False:
             components += dfsSCCRecurse(adj, j, visited)
@@ -122,8 +163,7 @@ def isConnected(adj):
     if not bfs(adj):
         return False
 
-    # Transpose adjacency matrix
-    transposeAdj = [[adj[j][i] for j in range(len(adj))] for i in range(len(adj[0]))]
+    transposeAdj = transpose(adj)
     return bfs(transposeAdj)
 
 
@@ -151,3 +191,9 @@ def bfs(adj):
         if nodeState == 0:
             return False
     return True
+
+# Transpose an adjacency matrix
+# Input: Adjacency matrix
+# Output: Tranposed adjacency matrix
+def transpose(adj):
+    return [[adj[j][i] for j in range(len(adj))] for i in range(len(adj[0]))]
