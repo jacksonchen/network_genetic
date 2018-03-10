@@ -10,7 +10,8 @@ def evaluate(g):
     return normEff
 
 # Calculates the efficiency of the graph by analyzing distances between every pair of
-# nodes. This uses the Floyd Warshall algorithm
+# nodes. This uses the Floyd Warshall algorithm.
+# Note: if an invalid graph is given, it returns -1
 # Input: A graph
 # Output: The efficiency value
 def efficiency(g):
@@ -67,22 +68,36 @@ def robustness(g):
                     if c != j:
                         tmpArr.append(g.adj[r][c])
                 modifiedAdj.append(tmpArr)
-        strucR[j] = structuralRobustness(modifiedAdj) / (g.n - 2)
-        funcR[j] = functionalRobustness(modifiedAdj)
+        results = robustnessStack(modifiedAdj)
+        funcR[j] = results[0]
+        strucR[j]  = results[1] / (g.n - 2)
 
     return min(strucR)
 
-def functionalRobustness(adj):
+# A robustness helper function that runs a DFS on the graph to populate a stack
+# before running the individual functional and structural robustness calculations
+# Input: An adjacency matrix
+# Output: [functional robustness, structural robustness]
+def robustnessStack(adj):
     visited = [False] * len(adj)
     stack = []
-    largestSCC = []
 
     for i in range(len(adj)):
         if visited[i] == False:
             dfsStackRecurse(adj, i, visited, stack)
 
     transposeAdj = transpose(adj)
+    return [functionalRobustness(transposeAdj, list(stack), adj),
+            structuralRobustness(transposeAdj, list(stack))]
+    # return structuralRobustness(transposeAdj, stack)
+
+# Calculates the functional robustness with respect to vertex j
+# for a given graph (with vertex j removed, presumeably)
+# Input: A transposed adjacency matrix of a graph, stack from DFS, original adjacency matrix
+# Output: Functional robustness of the graph
+def functionalRobustness(transposeAdj, stack, adj):
     visited = [False] * len(adj)
+    largestSCC = []
 
     while len(stack) > 0:
         i = stack.pop()
@@ -110,21 +125,12 @@ def functionalRobustness(adj):
 
 # Calculates the effective accessibility of a graph.
 # It does this by computing two DFS using Kosaraju's algorithm
-# Input: An adjacency matrix
+# Input: A transposed adjacency matrix for a graph, stack from DFS
 # Output: The effective accessibility of the graph
-def structuralRobustness(adj):
-    visited = [False] * len(adj)
-    stack = []
+def structuralRobustness(transposeAdj, stack):
+    visited = [False] * len(transposeAdj)
     accessibility = 0
 
-    # Populate stack
-    for i in range(len(adj)):
-        if visited[i] == False:
-            dfsStackRecurse(adj, i, visited, stack)
-
-    # Calculate accessibility
-    transposeAdj = transpose(adj)
-    visited = [False] * len(adj)
     while len(stack) > 0:
         i = stack.pop()
         if visited[i] == False:
