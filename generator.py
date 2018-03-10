@@ -4,6 +4,22 @@ from classes.graph import Graph
 from evaluator import isConnected
 from evaluator import efficiency
 
+# Generates a set of random graphs with the specified parameters
+# Input: number of nodes (int), number of edges (int), pool size (int), connectedness (boolean), weighted (boolean)
+# Output: Graphs array
+def generate(n, e, pool, needConnected, weighted):
+    graphs = []
+
+    for i in range(pool):
+        g = Graph(n, e, needConnected, weighted)
+        randomizeEdge(g)
+        while needConnected and not isConnected(g.adj):
+            g.resetEdges()
+            randomizeEdge(g)
+        graphs.append(g)
+
+    return graphs
+
 # Randomize edges in a graph
 # See https://stackoverflow.com/questions/48087/select-n-random-elements-from-a-listt-in-c-sharp/48089#48089
 # Input: A graph
@@ -22,19 +38,3 @@ def randomizeEdge(g):
                     g.adj[r][c] = 1
                 eNeeded -= 1
             remaining -= 1
-
-# Generates a set of random graphs with the specified parameters
-# Input: number of nodes (int), number of edges (int), pool size (int), connectedness (boolean), weighted (boolean)
-# Output: Graphs array
-def generate(n, e, pool, needConnected, weighted):
-    graphs = []
-
-    for i in range(pool):
-        g = Graph(n, e, needConnected, weighted)
-        randomizeEdge(g)
-        while needConnected and not isConnected(g.adj):
-            g.resetEdges()
-            randomizeEdge(g)
-        graphs.append(g)
-
-    return graphs

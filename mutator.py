@@ -1,77 +1,125 @@
 from random import randint
 from classes.graph import Graph
 
-def mutate(g):
-    mutateEdge(g)
+# Mutates a pool of candidate graphs with their fitness score.
+# Picks the best 2, reproduces them, and then mutate their children
+# Input: Pool of parents, respective array of fitness scores
+# Output: Pool of children (same size as parents)
+def mutate(pool, fitness):
+    # Indices for the best performing parents
+    parent1 = 0
+    parent2 = 1
 
-# Asexually mutates a graph with respect to its edges. It randomly picks an edge,
-# removes it, and then connect two previously non-adjacent vertices.
-# Input: Adjacency matrix
+    # Find the best two parents
+    for i in range(2, len(fitness)):
+        if fitness[i] > fitness[parent1]:
+            parent2 = parent1
+            parent1 = i
+        elif fitness[i] > fitness[parent2]:
+            parent2 = i
+
+    # Reproduction
+    children = crossover(pool[parent1], pool[parent2], len(pool))
+
+    # Mutation to revert to previous edge count
+    for child in children:
+        mutateEdge(child, pool[parent1].e)
+
+    return children
+
+# Asexually mutates a graph with respect to its edges. It checks if the graph has
+# the correct number of edges and does mutations either to revert it to the correct
+# number of edges, or just randomly moves edges around.
+# Input: Adjacency matrix, correct number of edges
 # Output: Nothing
-def mutateEdge(g):
+def mutateEdge(g, edges):
     if (g.e == g.n ** 2 - g.n): # Complete graph
         return
 
-    edge = randint(1, g.e) # Randomly chosen edge to remove
-    empty = randint(1, g.n ** 2 - g.n - g.e) # Randomly chosen nonedge to add
+    if (g.e > edges):
+        while g.e != edges:
+            removeEdge(g)
+            g.e -= 1
+    elif (g.e < edges):
+        while g.e != edges:
+            addEdge(g)
+            g.e += 1
+    else: # Edge count is correct, just do an edge swap for the mutation
+        removeEdge(g)
+        addEdge(g)
 
-    removeCounter = 0
-    removeIndices = []
-    addCounter = 0
-    addIndices = []
+# Removes an edge from a graph
+# Input: A graph
+# Output: Nothing
+def removeEdge(g):
+    edge = randint(1, g.e) # Randomly chosen edge to remove
+    removeCounter = 0 # Count up to the number "edge"
 
     for r in range(g.n):
         for c in range(g.n):
             if g.adj[r][c] > 0:
                 removeCounter += 1
-            elif r != c:
+
+                if removeCounter == edge: # Remove the edge once we reach "edge"
+                    g.adj[r][c] = 0
+                    return
+
+# Adds an edge to a graph
+# Input: A graph
+# Output: Nothing
+def addEdge(g):
+    empty = randint(1, g.n ** 2 - g.n - g.e) # Randomly chosen nonedge to add
+    addCounter = 0 # Count up to the number "empty"
+
+    for r in range(g.n):
+        for c in range(g.n):
+            if r != c and g.adj[r][c] == 0:
                 addCounter += 1
 
-            # Remove the edge
-            if removeCounter == edge:
-                removeIndices = [r, c]
-                removeCounter += 1
-                if len(addIndices) > 0: break
-
-            if addCounter == empty:
-                addIndices = [r, c]
-                addCounter += 1
-                if len(removeIndices) > 0: break
-
-    g.adj[addIndices[0]][addIndices[1]] = g.adj[removeIndices[0]][removeIndices[1]]
-    g.adj[removeIndices[0]][removeIndices[1]] = 0
+                if addCounter == empty: # Add edge once we reach "empty"
+                    g.adj[r][c] = 1
+                    return
 
 # Crossover sexual reproduction between 2 graphs. It randomly selects a subrectangle
 # in g1 that will be replaced with g2's edges, and vise versa
-# Input: Two graphs
-# Output: Two children graphs
-def crossover(g1, g2):
+# Input: Two graphs, number of children
+# Output: n children graphs
+def crossover(g1, g2, nChild):
     if g1.n != g2.n: # The dimensions of the graphs don't match
-        return []
+        raise AttributeError('Dimensions of graphs do not match')
 
-    # Sub-rectangle dimensions
-    left = randint(0, g1.n - 2)
-    right = randint(left + 1, g1.n - 1)
-    top = randint(0, g1.n - 2)
-    bottom = randint(top + 1, g1.n - 1)
+    children = [None] * nChild
+    base = None
+    addendum = None
 
-    child1 = Graph(g1.n, g1.e, g1.connected, g1.weighted)
-    child2 = Graph(g2.n, g2.e, g2.connected, g2.weighted)
+    for i in range(nChild):
+        # Randomly pick which graph is the base to be added upon
+        if (randint(0, 1) == 1):
+            base = g1
+            addendum = g2
+        else:
+            base = g2
+            addendum = g1
 
-    for r in range(g1.n):
-        for c in range(g1.n):
-            # If r, c indices not in the subrectangle
-            if r < top or r > bottom or c < left or c > right:
-                child1.adj[r][c] = g1.adj[r][c]
-            else:
-                child1.adj[r][c] = g2.adj[r][c]
+        # Sub-rectangle dimensions
+        left = randint(0, base.n - 2)
+        right = randint(left + 1, base.n - 1)
+        top = randint(0, base.n - 2)
+        bottom = randint(top + 1, base.n - 1)
 
-    for r in range(g2.n):
-        for c in range(g2.n):
-            # If r, c indices not in the subrectangle
-            if r < top or r > bottom or c < left or c > right:
-                child2.adj[r][c] = g2.adj[r][c]
-            else:
-                child2.adj[r][c] = g1.adj[r][c]
+        children[i] = Graph(base.n, base.e, base.connected, base.weighted)
+        childrenEdges = 0
 
-    return [child1, child2]
+        for r in range(base.n):
+            for c in range(base.n):
+                # If r, c indices not in the subrectangle
+                if r < top or r > bottom or c < left or c > right:
+                    children[i].adj[r][c] = base.adj[r][c]
+                else:
+                    children[i].adj[r][c] = addendum.adj[r][c]
+
+                if children[i].adj[r][c] == 1:
+                    childrenEdges += 1
+        children[i].e = childrenEdges # Properly update the edge count
+
+    return children

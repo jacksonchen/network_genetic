@@ -5,9 +5,10 @@ from functools import reduce
 # Calculates G, or the survival fitness function, for a given graph g
 # Input: A graph
 # Output: A fitness score
-def evaluate(g):
+def evaluate(g, alpha):
     normEff = efficiency(g)
-    return normEff
+    normRob = robustness(g)
+    return alpha * normEff + (1 - alpha) * normRob
 
 # Calculates the efficiency of the graph by analyzing distances between every pair of
 # nodes. This uses the Floyd Warshall algorithm.
