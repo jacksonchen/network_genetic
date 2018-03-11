@@ -19,8 +19,7 @@ def iterate(args):
         fitness.append(evaluate(seed, args.a))
 
     # Autostopping mechanism
-    while gensWithoutChange <= len(pool) * 100:
-        print("Generation", gens, ",Best score", maxScore, ",Avg score", reduce(lambda x, y: x + y, fitness) / len(fitness))
+    while gensWithoutChange <= len(pool) * 1000:
         pool = mutate(pool, fitness) # Set pool with next generation
         fitness = [] # Reset fitness
 
@@ -35,5 +34,6 @@ def iterate(args):
             else:
                 gensWithoutChange += 1
 
+        print("Generation", gens, ",Best score", maxScore, ",Avg score", reduce(lambda x, y: x + y, fitness) / len(fitness))
         gens += 1
     return best

@@ -19,12 +19,14 @@ def mutate(pool, fitness):
             parent2 = i
 
     # Reproduction
-    children = crossover(pool[parent1], pool[parent2], len(pool))
+    children = crossover(pool[parent1], pool[parent2], len(pool) - 1) # Tweak this if adding best back
 
     # Mutation to revert to previous edge count
     for child in children:
         mutateEdge(child, pool[parent1].e)
 
+    children.append(pool[parent1]) # Add the best parent back into children
+    # children.append(pool[parent2]) # Add the second best parent back into children
     return children
 
 # Asexually mutates a graph with respect to its edges. It checks if the graph has
