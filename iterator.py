@@ -14,13 +14,13 @@ def iterate(args):
     fitness = []
     gens = 1
 
-    pool = generate(args.n, args.e, args.p, args.c, args.w)
+    pool = generate(args.n, args.e, args.p, args.c, args.w, args.d)
     for seed in pool:
         fitness.append(evaluate(seed, args.a))
 
     # Autostopping mechanism
     while gensWithoutChange <= len(pool) * 1000:
-        pool = mutate(pool, fitness) # Set pool with next generation
+        pool = mutate(pool, fitness, args.d) # Set pool with next generation
         fitness = [] # Reset fitness
 
         # Now populate fitness array
