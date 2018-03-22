@@ -1,11 +1,13 @@
 from random import randint
+from evaluator import isConnected
+from copy import deepcopy
 from classes.graph import Graph
 
 # Mutates a pool of candidate graphs with their fitness score.
 # Picks the best 2, reproduces them, and then mutate their children
-# Input: Pool of parents, respective array of fitness scores, directedness (boolean)
+# Input: Pool of parents, respective array of fitness scores, connectedness, directedness
 # Output: Pool of children (same size as parents)
-def mutate(pool, fitness, directed):
+def mutate(pool, fitness, connected, directed):
     # Indices for the best performing parents
     parent1 = 0
     parent2 = 1
@@ -19,11 +21,21 @@ def mutate(pool, fitness, directed):
             parent2 = i
 
     # Reproduction
-    children = crossover(pool[parent1], pool[parent2], len(pool) - 1, directed) # Tweak this if adding best back
+    children = [None] * (len(pool) - 1)
+     # Tweak this if adding best back
+    for i in range(len(children)):
+        tmpChild = crossover(pool[parent1], pool[parent2], directed)
+        while connected and not isConnected(tmpChild.adj):
+            tmpChild = crossover(pool[parent1], pool[parent2], directed)
+        children[i] = tmpChild
 
     # Mutation to revert to previous edge count
     for child in children:
+        originalAdj = deepcopy(child.adj)
         mutateEdge(child, pool[parent1].e, directed)
+        while connected and not isConnected(child.adj):
+            child.adj = originalAdj
+            mutateEdge(child, pool[parent1].e, directed)
 
     children.append(pool[parent1]) # Add the best parent back into children
     # children.append(pool[parent2]) # Add the second best parent back into children
@@ -32,7 +44,7 @@ def mutate(pool, fitness, directed):
 # Asexually mutates a graph with respect to its edges. It checks if the graph has
 # the correct number of edges and does mutations either to revert it to the correct
 # number of edges, or just randomly moves edges around.
-# Input: Adjacency matrix, correct number of edges, directedness (boolean)
+# Input: Adjacency matrix, correct number of edges, directedness
 # Output: Nothing
 def mutateEdge(g, edges, directed):
     if (g.e == g.n ** 2 - g.n): # Complete graph
@@ -122,59 +134,56 @@ def generateRectangle(n):
 
 # Crossover sexual reproduction between 2 graphs. It randomly selects a subrectangle
 # in g1 that will be replaced with g2's edges, and vise versa
-# Input: Two graphs, number of children, directedness (boolean)
+# Input: Two graphs, directedness (boolean)
 # Output: n children graphs
-def crossover(g1, g2, nChild, directed):
+def crossover(g1, g2, directed):
     if g1.n != g2.n: # The dimensions of the graphs don't match
         raise AttributeError('Dimensions of graphs do not match')
 
-    children = [None] * nChild
     base = None
     addendum = None
 
-    for i in range(nChild):
-        # Randomly pick which graph is the base to be added upon
-        if (randint(0, 1) == 1):
-            base = g1
-            addendum = g2
-        else:
-            base = g2
-            addendum = g1
+    # Randomly pick which graph is the base to be added upon
+    if (randint(0, 1) == 1):
+        base = g1
+        addendum = g2
+    else:
+        base = g2
+        addendum = g1
 
-        children[i] = Graph(base.n, base.e, base.connected, base.weighted)
-        childrenEdges = 0
-        rect = generateRectangle(base.n)
+    child = Graph(base.n, base.e, base.connected, base.weighted)
+    childEdges = 0
+    rect = generateRectangle(base.n)
 
-        if directed: # Directed graph
-            for r in range(base.n):
-                for c in range(base.n):
+    if directed: # Directed graph
+        for r in range(base.n):
+            for c in range(base.n):
+                # If r, c indices not in the subrectangle
+                if r < rect['top'] or r > rect['bottom'] or c < rect['left'] or c > rect['right']:
+                    child.adj[r][c] = base.adj[r][c]
+                else:
+                    child.adj[r][c] = addendum.adj[r][c]
+
+                if child.adj[r][c] == 1:
+                    childEdges += 1
+        child.e = childEdges # Properly update the edge count
+    else: # Undirected graph
+        while (rect['bottom'] < rect['right'] and rect['top'] < rect['left']):
+            rect = generateRectangle(base.n)
+
+        for r in range(base.n):
+            for c in range(base.n):
+                if c < r:
+                    child.adj[r][c] = base.adj[c][r]
+                elif c > r:
                     # If r, c indices not in the subrectangle
                     if r < rect['top'] or r > rect['bottom'] or c < rect['left'] or c > rect['right']:
-                        children[i].adj[r][c] = base.adj[r][c]
+                        child.adj[r][c] = base.adj[r][c]
                     else:
-                        children[i].adj[r][c] = addendum.adj[r][c]
+                        child.adj[r][c] = addendum.adj[r][c]
 
-                    if children[i].adj[r][c] == 1:
-                        childrenEdges += 1
-            children[i].e = childrenEdges # Properly update the edge count
-        else: # Undirected graph
-            while (rect['bottom'] < rect['right'] and rect['top'] < rect['left']):
-                rect = generateRectangle(base.n)
+                    if child.adj[r][c] == 1:
+                        childEdges += 1
+        child.e = childEdges # Properly update the edge count
 
-            for r in range(base.n):
-                for c in range(base.n):
-                    if c < r:
-                        children[i].adj[r][c] = base.adj[c][r]
-                    elif c > r:
-                        # If r, c indices not in the subrectangle
-                        if r < rect['top'] or r > rect['bottom'] or c < rect['left'] or c > rect['right']:
-                            children[i].adj[r][c] = base.adj[r][c]
-                        else:
-                            children[i].adj[r][c] = addendum.adj[r][c]
-
-                        if children[i].adj[r][c] == 1:
-                            childrenEdges += 1
-            children[i].e = childrenEdges # Properly update the edge count
-
-
-    return children
+    return child

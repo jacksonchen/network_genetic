@@ -20,7 +20,7 @@ def iterate(args):
 
     # Autostopping mechanism
     while gensWithoutChange <= len(pool) * 1000:
-        pool = mutate(pool, fitness, args.d) # Set pool with next generation
+        pool = mutate(pool, fitness, args.c, args.d) # Set pool with next generation
         fitness = [] # Reset fitness
 
         # Now populate fitness array
