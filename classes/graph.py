@@ -2,8 +2,8 @@ class Graph:
     def __init__(self, n, e, connected, weighted):
         self.n = n # Nodes
         self.e = e # Edges
-        self.connected = connected # Connected?
-        self.weighted = weighted # Weighted?
+        self.connected = connected # Connected? [TODO: Remove]
+        self.weighted = weighted # Weighted? [TODO: Remove]
         self.adj = [[0 for i in range(n)] for j in range(n)] # Adj matrix
     def __str__(self):
         printStr = "   "

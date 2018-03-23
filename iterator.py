@@ -19,13 +19,12 @@ def iterate(args):
         fitness.append(evaluate(seed, args.a))
 
     # Autostopping mechanism
-    while gensWithoutChange <= len(pool) * 500: # 1000
+    while gensWithoutChange <= len(pool) * 1000:
         pool = mutate(pool, fitness, args.c, args.d) # Set pool with next generation
         fitness = [] # Reset fitness
 
         # Now populate fitness array
         for graph in pool:
-            # print(graphs)
             score = evaluate(graph, args.a)
             fitness.append(score)
             if score > maxScore:
