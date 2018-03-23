@@ -19,24 +19,34 @@ def mutate(pool, fitness, connected, directed):
             parent1 = i
         elif fitness[i] > fitness[parent2]:
             parent2 = i
-
+            
     # Reproduction
-    children = [None] * (len(pool) - 1)
-     # Tweak this if adding best back
+    children = [None] * (len(pool) - 1) # Tweak this if adding best back
+
     for i in range(len(children)):
         tmpChild = crossover(pool[parent1], pool[parent2], directed)
         while connected and not isConnected(tmpChild.adj):
             tmpChild = crossover(pool[parent1], pool[parent2], directed)
         children[i] = tmpChild
 
-    # Mutation to revert to previous edge count
-    for child in children:
-        originalAdj = deepcopy(child.adj)
-        mutateEdge(child, pool[parent1].e, directed)
-        while connected and not isConnected(child.adj):
-            child.adj = originalAdj
-            mutateEdge(child, pool[parent1].e, directed)
+        # print("<<<<")
+        # print(children[i])
+        # print("edges", children[i].e)
+        # print("------")
+        # Mutation to revert to previous edge count
+        originalAdj = deepcopy(children[i].adj)
+        originalE = children[i].e
 
+        mutateEdge(children[i], pool[parent1].e, directed)
+        while connected and not isConnected(children[i].adj):
+            # Resetting the child
+            children[i].adj = deepcopy(originalAdj)
+            children[i].e = originalE
+
+            mutateEdge(children[i], pool[parent1].e, directed)
+        # print(children[i])
+        # print("edges", children[i].e)
+        # print(">>>>")
     children.append(pool[parent1]) # Add the best parent back into children
     # children.append(pool[parent2]) # Add the second best parent back into children
     return children
@@ -47,18 +57,22 @@ def mutate(pool, fitness, connected, directed):
 # Input: Adjacency matrix, correct number of edges, directedness
 # Output: Nothing
 def mutateEdge(g, edges, directed):
-    if (g.e == g.n ** 2 - g.n): # Complete graph
+    if ((directed and g.e == g.n ** 2 - g.n)
+        or (not directed and g.e == (g.n ** 2 - g.n) / 2)): # Complete graph
         return
 
     if (g.e > edges):
+        # print("REMOVE EDGE")
         while g.e != edges:
             removeEdge(g, directed)
             g.e -= 1
     elif (g.e < edges):
+        # print("ADD EDGE")
         while g.e != edges:
             addEdge(g, directed)
             g.e += 1
     else: # Edge count is correct, just do an edge swap for the mutation
+        # print("SWAP EDGE")
         removeEdge(g, directed)
         addEdge(g, directed)
 
@@ -91,6 +105,8 @@ def removeEdge(g, directed):
 # Output: Nothing
 def addEdge(g, directed):
     empty = randint(1, g.n ** 2 - g.n - g.e) # Randomly chosen nonedge to add
+    if not directed:
+        empty = randint(1, (g.n ** 2 - g.n)/2 - g.e)
     addCounter = 0 # Count up to the number "empty"
 
     for r in range(g.n):
@@ -140,16 +156,12 @@ def crossover(g1, g2, directed):
     if g1.n != g2.n: # The dimensions of the graphs don't match
         raise AttributeError('Dimensions of graphs do not match')
 
-    base = None
-    addendum = None
-
     # Randomly pick which graph is the base to be added upon
+    base = g2
+    addendum = g1
     if (randint(0, 1) == 1):
         base = g1
         addendum = g2
-    else:
-        base = g2
-        addendum = g1
 
     child = Graph(base.n, base.e, base.connected, base.weighted)
     childEdges = 0
@@ -168,13 +180,14 @@ def crossover(g1, g2, directed):
                     childEdges += 1
         child.e = childEdges # Properly update the edge count
     else: # Undirected graph
+        # Generate a rectangle that contains elements in the upper right triangle
         while (rect['bottom'] < rect['right'] and rect['top'] < rect['left']):
             rect = generateRectangle(base.n)
 
         for r in range(base.n):
             for c in range(base.n):
                 if c < r:
-                    child.adj[r][c] = base.adj[c][r]
+                    child.adj[r][c] = child.adj[c][r]
                 elif c > r:
                     # If r, c indices not in the subrectangle
                     if r < rect['top'] or r > rect['bottom'] or c < rect['left'] or c > rect['right']:

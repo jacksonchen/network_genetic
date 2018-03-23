@@ -27,25 +27,23 @@ def generate(n, e, pool, needConnected, weighted, directed):
 def randomizeEdge(g, directed):
     eNeeded = g.e
     remaining = g.n ** 2 - g.n; # All possibilities except for main diagonal of adj matrix
+    if not directed: # Cut the possibilities in half if undirected graph
+        remaining /= 2
 
-    if directed: # Directed graph
-        for i in range(g.n ** 2): # Flatten adj matrix into 1D array
-            if i % (g.n + 1) != 0: # Ignore elements on main diagonal
+    for i in range(g.n ** 2): # Flatten adj matrix into 1D array
+        if i % (g.n + 1) != 0: # Ignore elements on main diagonal
+            r = i // g.n
+            c = i % g.n
+
+            if directed: # Directed graph
                 if random() < eNeeded / remaining: # Normalize probability of adding edge
-                    r = i // g.n
-                    c = i % g.n
                     if g.weighted:
                         g.adj[r][c] = random()
                     else:
                         g.adj[r][c] = 1
                     eNeeded -= 1
                 remaining -= 1
-    else: # Undirected graph
-        for i in range(g.n ** 2): # Flatten adj matrix into 1D array
-            if i % (g.n + 1) != 0: # Ignore elements on main diagonal
-                r = i // g.n
-                c = i % g.n
-
+            else: # Undirected graph
                 if r < c:
                     if random() < eNeeded / remaining: # Normalize probability of adding edge
                         if g.weighted:

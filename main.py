@@ -28,4 +28,6 @@ if __name__ == '__main__':
     parser.add_argument('--w', type=bool, default=False, help='Whether the graph should be weighted (default: false) [TODO]')
     parser.add_argument('--d', type=bool, default=False, help='Whether the graph should be directed (default: false)')
 
-    print(initialize(parser.parse_args()))
+    best = initialize(parser.parse_args())
+    print(best)
+    print("Edges", best.e)
