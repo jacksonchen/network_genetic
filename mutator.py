@@ -19,7 +19,7 @@ def mutate(pool, fitness, connected, directed):
             parent1 = i
         elif fitness[i] > fitness[parent2]:
             parent2 = i
-            
+
     # Reproduction
     children = [None] * (len(pool) - 1) # Tweak this if adding best back
 
@@ -29,10 +29,6 @@ def mutate(pool, fitness, connected, directed):
             tmpChild = crossover(pool[parent1], pool[parent2], directed)
         children[i] = tmpChild
 
-        # print("<<<<")
-        # print(children[i])
-        # print("edges", children[i].e)
-        # print("------")
         # Mutation to revert to previous edge count
         originalAdj = deepcopy(children[i].adj)
         originalE = children[i].e
@@ -44,9 +40,6 @@ def mutate(pool, fitness, connected, directed):
             children[i].e = originalE
 
             mutateEdge(children[i], pool[parent1].e, directed)
-        # print(children[i])
-        # print("edges", children[i].e)
-        # print(">>>>")
     children.append(pool[parent1]) # Add the best parent back into children
     # children.append(pool[parent2]) # Add the second best parent back into children
     return children
@@ -62,17 +55,14 @@ def mutateEdge(g, edges, directed):
         return
 
     if (g.e > edges):
-        # print("REMOVE EDGE")
         while g.e != edges:
             removeEdge(g, directed)
             g.e -= 1
     elif (g.e < edges):
-        # print("ADD EDGE")
         while g.e != edges:
             addEdge(g, directed)
             g.e += 1
     else: # Edge count is correct, just do an edge swap for the mutation
-        # print("SWAP EDGE")
         removeEdge(g, directed)
         addEdge(g, directed)
 
