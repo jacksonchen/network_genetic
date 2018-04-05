@@ -24,12 +24,10 @@ def mutate(pool, fitness, connected, directed):
     children = [None] * (len(pool) - 1) # Tweak this if adding best back
 
     for i in range(len(children)):
+        # Sexual mutation
         children[i] = crossover(pool[parent1], pool[parent2], directed)
 
-        # Mutation to revert to previous edge count
-        originalAdj = deepcopy(children[i].adj)
-        originalE = children[i].e
-
+        # Asexual mutation
         mutateEdge(children[i], pool[parent1].e, directed, connected)
         while connected and not isConnected(children[i].adj):
             mutateEdge(children[i], pool[parent1].e, directed, connected)

@@ -1,3 +1,5 @@
+from time import time
+
 from queue import Queue
 from classes.graph import Graph
 from functools import reduce
@@ -70,8 +72,9 @@ def robustness(g):
                         tmpArr.append(g.adj[r][c])
                 modifiedAdj.append(tmpArr)
         results = robustnessStack(modifiedAdj)
-        funcR[j] = results[0]
-        strucR[j]  = results[1] / (g.n - 2)
+        # funcR[j] = results[0]
+        # strucR[j]  = results[1] / (g.n - 2)
+        strucR[j]  = results / (g.n - 2)
 
     return min(strucR)
 
@@ -88,12 +91,13 @@ def robustnessStack(adj):
             dfsStackRecurse(adj, i, visited, stack)
 
     transposeAdj = transpose(adj)
-    return [functionalRobustness(transposeAdj, list(stack), adj),
-            structuralRobustness(transposeAdj, list(stack))]
-    # return structuralRobustness(transposeAdj, stack)
+    # return [functionalRobustness(transposeAdj, list(stack), adj),
+    #         structuralRobustness(transposeAdj, list(stack))]
+    return structuralRobustness(transposeAdj, stack)
 
 # Calculates the functional robustness with respect to vertex j
 # for a given graph (with vertex j removed, presumeably)
+# TODO: Too inefficient time-wise (30x closer then structural calculation)
 # Input: A transposed adjacency matrix of a graph, stack from DFS, original adjacency matrix
 # Output: Functional robustness of the graph
 def functionalRobustness(transposeAdj, stack, adj):
