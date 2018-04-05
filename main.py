@@ -1,6 +1,10 @@
 import argparse
 
 from iterator import iterate
+import evaluator
+import networkx as nx
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Takes the user input and checks for invalidity
 # Input: Args object
@@ -17,6 +21,11 @@ def initialize(args):
 
     return iterate(args)
 
+def show_graph_with_labels(adjacency_matrix):
+    gr = nx.from_numpy_matrix(np.matrix(adjacency_matrix))
+    nx.draw(gr)
+    plt.show()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='''A genetic algorithm that generates network topologies based on user input''')
@@ -29,4 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--d', type=bool, default=False, help='Whether the graph should be directed (default: false)')
 
     best = initialize(parser.parse_args())
+    print("efficiency", evaluator.efficiency(best))
+    print("robustness", evaluator.robustness(best))
+    show_graph_with_labels(best.adj)
     print(best)
