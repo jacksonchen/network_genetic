@@ -4,6 +4,7 @@ from iterator import iterate
 import evaluator
 import networkx as nx
 import numpy as np
+import matplotlib.pyplot as savefig
 import matplotlib.pyplot as plt
 
 # Takes the user input and checks for invalidity

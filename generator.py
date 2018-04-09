@@ -1,4 +1,5 @@
 from random import random
+from random import randint
 
 from classes.graph import Graph
 from evaluator import isConnected
@@ -12,10 +13,10 @@ def generate(n, e, pool, needConnected, weighted, directed):
 
     for i in range(pool):
         g = Graph(n, e, needConnected, weighted)
-        randomizeEdge(g, directed)
+        randomizeEdge(g, directed, needConnected)
         while needConnected and not isConnected(g.adj):
             g.resetEdges()
-            randomizeEdge(g, directed)
+            randomizeEdge(g, directed, needConnected)
         graphs.append(g)
 
     return graphs
@@ -24,8 +25,24 @@ def generate(n, e, pool, needConnected, weighted, directed):
 # See https://stackoverflow.com/questions/48087/select-n-random-elements-from-a-listt-in-c-sharp/48089#48089
 # Input: A graph, directedness (boolean)
 # Output: N/A
-def randomizeEdge(g, directed):
-    eNeeded = g.e
+def randomizeEdge(g, directed, connected):
+    if connected:
+        unconnected = list(range(g.n))
+        edgesAdded = 0
+        for r in unconnected:
+            randEdge = randint(0, g.n - 2)
+            if randEdge == r:
+                randEdge = g.n - 1
+
+            edgesAdded += 1
+            g.adj[r][randEdge] = 1
+            if not directed:
+                g.adj[randEdge][r] = 1
+
+            if randEdge > r and randEdge in unconnected:
+                unconnected.remove(randEdge)
+
+    eNeeded = g.e - edgesAdded
     remaining = g.n ** 2 - g.n; # All possibilities except for main diagonal of adj matrix
     if not directed: # Cut the possibilities in half if undirected graph
         remaining /= 2

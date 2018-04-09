@@ -7,7 +7,7 @@ from classes.graph import Graph
 # Picks the best 2, reproduces them, and then mutate their children
 # Input: Pool of parents, respective array of fitness scores, connectedness, directedness
 # Output: Pool of children (same size as parents)
-def mutate(pool, fitness, connected, directed):
+def mutate(pool, fitness, gensWithoutChange, connected, directed, annealing):
     # Indices for the best performing parents
     parent1 = 0
     parent2 = 1
@@ -21,18 +21,29 @@ def mutate(pool, fitness, connected, directed):
             parent2 = i
 
     # Reproduction
-    children = [None] * (len(pool) - 1) # Tweak this if adding best back
+    if annealing:
+        children = [None] * len(pool)
+    else:
+        children = [None] * (len(pool) - 1)
+
 
     for i in range(len(children)):
-        # Sexual mutation
-        children[i] = crossover(pool[parent1], pool[parent2], directed)
-
+        if annealing:
+            print("Annealing")
+            # Sexual mutation
+            p1 = randint(0, len(pool) - 1)
+            p2 = randint(0, len(pool) - 1)
+            while p2 == p1:
+                p2 = randint(0, len(pool) - 1)
+            children[i] = crossover(pool[p1], pool[p2], directed)
+        else:
+            children[i] = crossover(pool[parent1], pool[parent2], directed)
         # Asexual mutation
         mutateEdge(children[i], pool[parent1].e, directed, connected)
         while connected and not isConnected(children[i].adj):
             mutateEdge(children[i], pool[parent1].e, directed, connected)
-    children.append(pool[parent1]) # Add the best parent back into children
-    # children.append(pool[parent2]) # Add the second best parent back into children
+    if not annealing:
+        children.append(pool[parent1]) # Add the best parent back into children
     return children
 
 # Asexually mutates a graph with respect to its edges. It checks if the graph has
@@ -80,10 +91,9 @@ def removeEdge(g, directed):
                     g.adj[c][r] = 0
                     return
 
-
 # Adds an edge to a graph
 # Input: A graph, directedness
-# Output: Nothing
+# Output: Edge index that was added
 def addEdge(g, directed, connected):
     required = [] # Unconnected nodes
     for r in range(g.n):
@@ -107,14 +117,14 @@ def addEdge(g, directed, connected):
 
                     if addCounter == empty: # Add edge once we reach "empty"
                         g.adj[r][c] = 1
-                        return
+                        return empty
                 elif not directed and r < c and g.adj[r][c] == 0:
                     addCounter += 1
 
                     if addCounter == empty: # Add edge once we reach "empty"
                         g.adj[r][c] = 1
                         g.adj[c][r] = 1
-                        return
+                        return empty
     else: # Has unconnected node, add edge to connect
         empty = randint(1, len(required) * (g.n - 1))
         addCounter = 0

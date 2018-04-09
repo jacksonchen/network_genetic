@@ -1,5 +1,3 @@
-from time import time
-
 from queue import Queue
 from classes.graph import Graph
 from functools import reduce
@@ -60,7 +58,7 @@ def efficiency(g):
 # Output: The robustness value
 def robustness(g):
     strucR = [0] * g.n # Structural robustness with respect to each node
-    funcR = [0] * g.n # Functional robustness
+    # funcR = [0] * g.n # Functional robustness
     for j in range(g.n):
         modifiedAdj = []
 

@@ -1,0 +1,7 @@
+Todo:
+
+- Create mutation video
+- Put results on the slide (SECON results essentially)
+- Put the algorithm on the slide
+
+convert -quality 100 -delay 10x100  *.png gen.mpeg
