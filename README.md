@@ -45,3 +45,10 @@ This GA will be split into the following components, with each interaction descr
   - Purpose: Mutate the networks that performed the best
   - Input: A set of networks (or a network)
   - Output: A mutated network
+
+### Seeing results
+If you run the GA and see images for each generation populating the `img/` folder,
+then you can run the following command to convert all of the images into a video:
+```
+convert -quality 100 -delay 10x100  *.png gen.mpeg
+```

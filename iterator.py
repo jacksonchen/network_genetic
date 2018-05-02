@@ -42,10 +42,12 @@ def iterate(args):
     for seed in pool:
         fitness.append(evaluate(seed, args.a))
 
+    annealingGen = max(len(pool) * 50, len(pool) * args.s / 4)
+
     # Autostopping mechanism
     while globalgensWithoutChange <= len(pool) * args.s:
-        annealingGen = max(len(pool) * 50, len(pool) * args.s / 4)
         if gensWithoutChange >= annealingGen:
+            print("Setting annealing")
             annealing = True
 
         pool = mutate(pool, fitness, gensWithoutChange, args.c, args.d, annealing) # Set pool with next generation
@@ -55,7 +57,8 @@ def iterate(args):
         with Pool(4) as p:
             fitness = p.map(runFitness, pool)
 
-        if annealing:
+        if gensWithoutChange > annealingGen + (10 * len(pool)):
+            print("Stopping annealing")
             annealing = False
             gensWithoutChange = 0
 

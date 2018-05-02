@@ -1,7 +1,20 @@
 Todo:
 
-- Create mutation video
-- Put results on the slide (SECON results essentially)
-- Put the algorithm on the slide
+  - A new efficiency metric (APSP / Diameter)
+    - Diameter = worst shortest path
+  - New robustness metrics
+    - Reliability polynomial
+      - Edge removal
+      - Node removal
 
-convert -quality 100 -delay 10x100  *.png gen.mpeg
+By May 1:
+  - Lab report
+    - Start with GA explanation
+    - Explain SECON paper
+    - Discuss results
+    - Discuss better metrics for efficiency and robustness
+  - Submit nicely commented code (pretty much done, just update README with some more details)
+
+Lab Report:
+  - Redo for original SECON metrics
+  - Conduct experiment for the new metrics

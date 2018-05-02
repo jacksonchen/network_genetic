@@ -29,7 +29,6 @@ def mutate(pool, fitness, gensWithoutChange, connected, directed, annealing):
 
     for i in range(len(children)):
         if annealing:
-            print("Annealing")
             # Sexual mutation
             p1 = randint(0, len(pool) - 1)
             p2 = randint(0, len(pool) - 1)
@@ -39,9 +38,9 @@ def mutate(pool, fitness, gensWithoutChange, connected, directed, annealing):
         else:
             children[i] = crossover(pool[parent1], pool[parent2], directed)
         # Asexual mutation
-        mutateEdge(children[i], pool[parent1].e, directed, connected)
+        mutateEdge(children[i], pool[parent1].e, directed)
         while connected and not isConnected(children[i].adj):
-            mutateEdge(children[i], pool[parent1].e, directed, connected)
+            mutateEdge(children[i], pool[parent1].e, directed)
     if not annealing:
         children.append(pool[parent1]) # Add the best parent back into children
     return children
@@ -51,7 +50,7 @@ def mutate(pool, fitness, gensWithoutChange, connected, directed, annealing):
 # number of edges, or just randomly moves edges around.
 # Input: Adjacency matrix, correct number of edges, directedness
 # Output: Nothing
-def mutateEdge(g, edges, directed, connected):
+def mutateEdge(g, edges, directed):
     if ((directed and g.e == g.n ** 2 - g.n)
         or (not directed and g.e == (g.n ** 2 - g.n) / 2)): # Complete graph
         return
@@ -62,11 +61,11 @@ def mutateEdge(g, edges, directed, connected):
             g.e -= 1
     elif (g.e < edges):
         while g.e != edges:
-            addEdge(g, directed, connected)
+            addEdge(g, directed)
             g.e += 1
     else: # Edge count is correct, just do an edge swap for the mutation
         removeEdge(g, directed)
-        addEdge(g, directed, connected)
+        addEdge(g, directed)
 
 # Removes an edge from a graph
 # Input: A graph, directedness
@@ -94,54 +93,27 @@ def removeEdge(g, directed):
 # Adds an edge to a graph
 # Input: A graph, directedness
 # Output: Edge index that was added
-def addEdge(g, directed, connected):
-    required = [] # Unconnected nodes
+def addEdge(g, directed):
+    empty = randint(1, g.n ** 2 - g.n - g.e) # Randomly chosen nonedge to add
+    if not directed:
+        empty = randint(1, (g.n ** 2 - g.n)/2 - g.e)
+    addCounter = 0 # Count up to the number "empty"
+
     for r in range(g.n):
-        edgeSum = 0
         for c in range(g.n):
-            edgeSum += g.adj[r][c]
+            if directed and r != c and g.adj[r][c] == 0:
+                addCounter += 1
 
-        if edgeSum == 0:
-            required.append(r)
+                if addCounter == empty: # Add edge once we reach "empty"
+                    g.adj[r][c] = 1
+                    return
+            elif not directed and r < c and g.adj[r][c] == 0:
+                addCounter += 1
 
-    if len(required) == 0 or not connected: # No unconnected nodes, add edge anywhere
-        empty = randint(1, g.n ** 2 - g.n - g.e) # Randomly chosen nonedge to add
-        if not directed:
-            empty = randint(1, (g.n ** 2 - g.n)/2 - g.e)
-        addCounter = 0 # Count up to the number "empty"
-
-        for r in range(g.n):
-            for c in range(g.n):
-                if directed and r != c and g.adj[r][c] == 0:
-                    addCounter += 1
-
-                    if addCounter == empty: # Add edge once we reach "empty"
-                        g.adj[r][c] = 1
-                        return empty
-                elif not directed and r < c and g.adj[r][c] == 0:
-                    addCounter += 1
-
-                    if addCounter == empty: # Add edge once we reach "empty"
-                        g.adj[r][c] = 1
-                        g.adj[c][r] = 1
-                        return empty
-    else: # Has unconnected node, add edge to connect
-        empty = randint(1, len(required) * (g.n - 1))
-        addCounter = 0
-
-        for r in required:
-            for c in range(g.n):
-                if directed and r != c:
-                    addCounter += 1
-                    if addCounter == empty:
-                        g.adj[r][c] = 1
-                        return
-                elif not directed and r != c:
-                    addCounter += 1
-                    if addCounter == empty:
-                        g.adj[r][c] = 1
-                        g.adj[c][r] = 1
-                        return
+                if addCounter == empty: # Add edge once we reach "empty"
+                    g.adj[r][c] = 1
+                    g.adj[c][r] = 1
+                    return
 
 # Generating unbiased sub-rectangle dimensions
 def generateRectangle(n):

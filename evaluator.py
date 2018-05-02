@@ -51,7 +51,11 @@ def efficiency(g):
     # APSP for a star
     starAPSP = 2 * (1 - 1 / g.n)
 
+    # SECON metric
     return starAPSP / APSP
+
+    # New metric
+    # return 1 / APSP
 
 # Calculates the structural and functional robustness of a graph
 # Input: A graph
@@ -70,11 +74,22 @@ def robustness(g):
                         tmpArr.append(g.adj[r][c])
                 modifiedAdj.append(tmpArr)
         results = robustnessStack(modifiedAdj)
-        # funcR[j] = results[0]
-        # strucR[j]  = results[1] / (g.n - 2)
+
+        # SECON metric
         strucR[j]  = results / (g.n - 2)
 
+        # New metric: Number of neighbors
+        # neighbors = 0
+        # for r in range(g.n):
+        #     if r != j and g.adj[j][r]:
+        #         neighbors += 1
+        # strucR[j]  = (results / (g.n - 2)) * neighbors / (g.e * 2)
+
+    # SECON metric
     return min(strucR)
+
+    # New metric
+    # return sum(strucR)
 
 # A robustness helper function that runs a DFS on the graph to populate a stack
 # before running the individual functional and structural robustness calculations

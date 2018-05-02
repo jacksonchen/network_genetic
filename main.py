@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--n', type=int, default=10, help='The number of nodes in the network: [2, INF)')
     parser.add_argument('--e', type=int, default=30, help='The number of edges in the network: [1, INF)')
     parser.add_argument('--p', type=int, default=10, help='Parent pool size for the GA: [2, INF)')
-    parser.add_argument('--s', type=int, default=250, help='Number of generations with improvement before stopping')
+    parser.add_argument('--s', type=int, default=250, help='Number of generations without improvement before stopping')
     parser.add_argument('--a', type=float, default=0, help='Alpha value for evaluation: [0, 1]')
     parser.add_argument('--c', type=bool, default=True, help='Whether the graph should be connected (default: true)')
     parser.add_argument('--w', type=bool, default=False, help='Whether the graph should be weighted (default: false) [TODO]')
