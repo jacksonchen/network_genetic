@@ -27,13 +27,13 @@ This GA will be split into the following components, with each interaction descr
   - Output: Best networks and their scores
 
 `generator.py`
-  - Purpose: Generate a seed network
+  - Purpose: Generate an initial generation of seed networks
   - Input: Custom parameters for network constraints (if any)
   - Output: A network described in an object
 
 `iterator.py`
   - Purpose: Begin and maintain a loop of evaluating and mutating networks
-  - Input: Seed network from `generator`
+  - Input: Seed network generation from `generator`
   - Output: A best network given certain specified stopping mechanisms
 
 `evaluator.py`
@@ -44,7 +44,11 @@ This GA will be split into the following components, with each interaction descr
 `mutator.py`
   - Purpose: Mutate the networks that performed the best
   - Input: A set of networks (or a network)
-  - Output: A mutated network
+  - Output: A new generation of mutated networks
+
+## Changing Evaluation Mechanism
+This GA can run on SECON metrics or on the custom metrics. Make these changes in `evaluator.py`.
+Uncomment/comment lines 52, 54 for efficiency. Or lines 79, 82-86, 89, 92 for robustness.
 
 ### Seeing results
 If you run the GA and see images for each generation populating the `img/` folder,
@@ -52,3 +56,10 @@ then you can run the following command to convert all of the images into a video
 ```
 convert -quality 100 -delay 10x100  *.png gen.mpeg
 ```
+
+### TODO
+There are still a couple of things that need to be worked on. For example, a multi-starting point
+needs to be added as an additional way to overcome local optima. In terms of extensibility,
+the directedness and weightedness have not been tested since all of the research
+results have been done on unweighted, undirected graphs. However, the options are there
+and should be able to be quickly debugged should any issues arise.

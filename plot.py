@@ -122,7 +122,7 @@ def star(n):
         g.adj[0][i] = 1
     return g
 
-n = list(range(3, 10, 1))
+n = list(range(5, 51, 1))
 obj = {}
 for j in range(0, 11):
     alpha = j/10
@@ -134,7 +134,6 @@ for j in range(0, 11):
 ax = plt.subplot(111)
 ax.set_color_cycle(["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"])
 for alpha in obj:
-    # plt.scatter(n, obj[alpha], label=str(alpha))
     ax.plot(n, obj[alpha], label=str(alpha))
 
 handles, labels = ax.get_legend_handles_labels()
